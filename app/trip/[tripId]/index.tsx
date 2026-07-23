@@ -404,17 +404,12 @@ export default function TripDetailsScreen() {
 
           <View style={styles.featureGrid}>
             <Pressable
-              onPress={() =>
-                Alert.alert(
-                  'Coming soon',
-                  'The itinerary builder will be added next.'
-                )
-              }
+              onPress={() => router.push(`/trip/${trip.id}/itinerary`)}
               style={({ pressed }) => [
                 styles.featureCard,
                 pressed && styles.pressedCard,
               ]}
-            >
+          >
               <Text style={styles.featureEmoji}>🗓️</Text>
               <Text style={styles.featureTitle}>Itinerary</Text>
               <Text style={styles.featureDescription}>
@@ -423,12 +418,7 @@ export default function TripDetailsScreen() {
             </Pressable>
 
             <Pressable
-              onPress={() =>
-                Alert.alert(
-                  'Coming soon',
-                  'AI packing recommendations will be added soon.'
-                )
-              }
+              onPress={() => router.push(`/trip/${trip.id}/packing`)}
               style={({ pressed }) => [
                 styles.featureCard,
                 pressed && styles.pressedCard,
@@ -763,4 +753,4 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     color: '#FFFFFF',
   },
-});
+})
