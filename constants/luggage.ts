@@ -44,6 +44,6 @@ export function getLuggageOption(
 ): LuggageOption {
   return (
     LUGGAGE_OPTIONS.find((option) => option.value === value) ??
-    LUGGAGE_OPTIONS[1]
+    LUGGAGE_OPTIONS[1]!
   );
 }

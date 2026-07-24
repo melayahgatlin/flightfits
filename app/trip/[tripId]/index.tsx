@@ -354,11 +354,11 @@ export default function TripDetailsScreen() {
           <Text style={styles.sectionTitle}>Luggage</Text>
 
           <View style={styles.luggageCard}>
-            <Text style={styles.luggageEmoji}>{luggage.emoji}</Text>
+            <Text style={styles.luggageEmoji}>{luggage?.emoji ?? '🧳'}</Text>
 
             <View>
               <Text style={styles.luggageLabel}>
-                {luggage.label}
+                {luggage?.label ?? 'Not selected'}
               </Text>
 
               <Text style={styles.luggageDescription}>
@@ -433,10 +433,10 @@ export default function TripDetailsScreen() {
 
             <Pressable
               onPress={() =>
-                Alert.alert(
-                  'Coming soon',
-                  'Trip outfit planning will be added soon.'
-                )
+                router.push({
+                  pathname: '/outfits/create' as never,
+                  params: { tripId: trip.id },
+                })
               }
               style={({ pressed }) => [
                 styles.featureCard,

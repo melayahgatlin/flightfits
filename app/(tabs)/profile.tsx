@@ -48,7 +48,7 @@ export default function ProfileScreen() {
       <View style={styles.stats}>
         <ProfileStat
           value="0"
-          label="Outfits"
+          label="Outfit"
         />
         <ProfileStat
           value="0"
