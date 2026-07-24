@@ -1,4 +1,4 @@
-import { Tabs } from "expo-router";
+import { Redirect, Tabs } from "expo-router";
 import {
   Platform,
   StyleSheet,
@@ -6,6 +6,7 @@ import {
 } from "react-native";
 
 import { Colors } from "@/constants/colors";
+import { useAuth } from "@/hooks/useAuth";
 import {
   Layout,
   Spacing,
@@ -69,6 +70,16 @@ function TabIcon({
 }
 
 export default function TabsLayout() {
+  const { loading, mode } = useAuth();
+
+  if (loading) {
+    return null;
+  }
+
+  if (mode === "signed-out") {
+    return <Redirect href="/onboarding" />;
+  }
+
   return (
     <Tabs
       screenOptions={({ route }) => ({

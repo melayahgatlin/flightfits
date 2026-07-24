@@ -1,63 +1,74 @@
+import { router } from 'expo-router';
 import {
+  Alert,
   Pressable,
   ScrollView,
   StyleSheet,
   Text,
   View,
-} from "react-native";
+} from 'react-native';
 
-import { Colors } from "@/constants/colors";
-import {
-  Radius,
-  Spacing,
-} from "@/constants/spacing";
+import { Colors } from '@/constants/colors';
+import { Radius, Spacing } from '@/constants/spacing';
+import { useAuth } from '@/hooks/useAuth';
 
 const PROFILE_ACTIONS = [
-  "Edit profile",
-  "My outfit boards",
-  "Saved inspiration",
-  "Travel preferences",
-  "Privacy and safety",
-  "Settings",
+  'Edit profile',
+  'My outfit boards',
+  'Saved inspiration',
+  'Travel preferences',
+  'Privacy and safety',
+  'Settings',
 ] as const;
 
 export default function ProfileScreen() {
+  const { user, isGuest, logout } = useAuth();
+  const displayName = isGuest ? 'Guest traveler' : user?.name ?? 'Your profile';
+  const subtitle = isGuest ? 'Local guest mode' : user?.email ?? '@flightfits-traveler';
+  const initial = displayName.trim().charAt(0).toUpperCase() || 'F';
+
+  function handleLogout() {
+    Alert.alert(
+      isGuest ? 'Exit guest mode?' : 'Log out?',
+      isGuest
+        ? 'Your local trip data will remain on this device.'
+        : 'You can log back in with your local FlightFits account.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: isGuest ? 'Exit' : 'Log out',
+          style: 'destructive',
+          onPress: async () => {
+            await logout();
+            router.replace('/onboarding');
+          },
+        },
+      ],
+    );
+  }
+
   return (
-    <ScrollView
-      style={styles.screen}
-      contentContainerStyle={styles.content}
-    >
+    <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
       <View style={styles.profileHeader}>
         <View style={styles.avatar}>
-          <Text style={styles.avatarText}>
-            M
-          </Text>
+          <Text style={styles.avatarText}>{initial}</Text>
         </View>
 
         <View style={styles.profileText}>
-          <Text style={styles.name}>
-            Your profile
-          </Text>
-
-          <Text style={styles.username}>
-            @flightfits-traveler
-          </Text>
+          <Text style={styles.name}>{displayName}</Text>
+          <Text style={styles.username}>{subtitle}</Text>
+          {isGuest && (
+            <Text style={styles.guestNote}>
+              Create an account later to prepare for cloud sync.
+            </Text>
+          )}
         </View>
       </View>
 
       <View style={styles.stats}>
-        <ProfileStat
-          value="0"
-          label="Outfit"
-        />
-        <ProfileStat
-          value="0"
-          label="Boards"
-        />
-        <ProfileStat
-          value="0"
-          label="Trips"
-        />
+        <ProfileStat value="0" label="Outfits" />
+        <ProfileStat value="0" label="Boards" />
+        <ProfileStat value="0" label="Trips" />
       </View>
 
       <View style={styles.actions}>
@@ -65,21 +76,26 @@ export default function ProfileScreen() {
           <Pressable
             accessibilityRole="button"
             key={action}
-            style={({ pressed }) => [
-              styles.action,
-              pressed && styles.pressed,
-            ]}
+            style={({ pressed }) => [styles.action, pressed && styles.pressed]}
           >
-            <Text style={styles.actionText}>
-              {action}
-            </Text>
-
-            <Text style={styles.chevron}>
-              ›
-            </Text>
+            <Text style={styles.actionText}>{action}</Text>
+            <Text style={styles.chevron}>›</Text>
           </Pressable>
         ))}
       </View>
+
+      <Pressable
+        accessibilityRole="button"
+        onPress={handleLogout}
+        style={({ pressed }) => [
+          styles.logoutButton,
+          pressed && styles.pressed,
+        ]}
+      >
+        <Text style={styles.logoutText}>
+          {isGuest ? 'Exit guest mode' : 'Log out'}
+        </Text>
+      </Pressable>
     </ScrollView>
   );
 }
@@ -89,66 +105,44 @@ interface ProfileStatProps {
   label: string;
 }
 
-function ProfileStat({
-  value,
-  label,
-}: ProfileStatProps) {
+function ProfileStat({ value, label }: ProfileStatProps) {
   return (
     <View style={styles.stat}>
-      <Text style={styles.statValue}>
-        {value}
-      </Text>
-
-      <Text style={styles.statLabel}>
-        {label}
-      </Text>
+      <Text style={styles.statValue}>{value}</Text>
+      <Text style={styles.statLabel}>{label}</Text>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  screen: {
-    flex: 1,
-    backgroundColor: Colors.background,
-  },
-  content: {
-    padding: Spacing.md,
-    paddingBottom: Spacing.xxxl,
-  },
+  screen: { flex: 1, backgroundColor: Colors.background },
+  content: { padding: Spacing.md, paddingBottom: Spacing.xxxl },
   profileHeader: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     gap: Spacing.md,
     paddingVertical: Spacing.md,
   },
   avatar: {
     width: 74,
     height: 74,
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: 'center',
+    justifyContent: 'center',
     borderRadius: Radius.full,
     backgroundColor: Colors.primaryLight,
   },
-  avatarText: {
-    color: Colors.primaryDark,
-    fontSize: 29,
-    fontWeight: "800",
-  },
-  profileText: {
-    flex: 1,
-  },
-  name: {
-    color: Colors.text,
-    fontSize: 23,
-    fontWeight: "800",
-  },
-  username: {
-    color: Colors.textMuted,
-    fontSize: 15,
-    marginTop: Spacing.xxs,
+  avatarText: { color: Colors.primaryDark, fontSize: 29, fontWeight: '800' },
+  profileText: { flex: 1 },
+  name: { color: Colors.text, fontSize: 23, fontWeight: '800' },
+  username: { color: Colors.textMuted, fontSize: 15, marginTop: Spacing.xxs },
+  guestNote: {
+    color: Colors.primary,
+    fontSize: 12,
+    lineHeight: 17,
+    marginTop: Spacing.xs,
   },
   stats: {
-    flexDirection: "row",
+    flexDirection: 'row',
     marginVertical: Spacing.lg,
     paddingVertical: Spacing.md,
     borderRadius: Radius.md,
@@ -156,22 +150,11 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: Colors.border,
   },
-  stat: {
-    flex: 1,
-    alignItems: "center",
-  },
-  statValue: {
-    color: Colors.text,
-    fontSize: 20,
-    fontWeight: "800",
-  },
-  statLabel: {
-    color: Colors.textMuted,
-    fontSize: 13,
-    marginTop: Spacing.xxs,
-  },
+  stat: { flex: 1, alignItems: 'center' },
+  statValue: { color: Colors.text, fontSize: 20, fontWeight: '800' },
+  statLabel: { color: Colors.textMuted, fontSize: 13, marginTop: Spacing.xxs },
   actions: {
-    overflow: "hidden",
+    overflow: 'hidden',
     borderRadius: Radius.md,
     borderWidth: 1,
     borderColor: Colors.border,
@@ -179,24 +162,25 @@ const styles = StyleSheet.create({
   },
   action: {
     minHeight: 56,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     paddingHorizontal: Spacing.md,
-    borderBottomWidth:
-      StyleSheet.hairlineWidth,
+    borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: Colors.divider,
   },
-  actionText: {
-    color: Colors.text,
-    fontSize: 16,
-    fontWeight: "600",
+  actionText: { color: Colors.text, fontSize: 16, fontWeight: '600' },
+  chevron: { color: Colors.textMuted, fontSize: 26 },
+  logoutButton: {
+    minHeight: 52,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: Spacing.lg,
+    borderRadius: Radius.md,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    backgroundColor: Colors.surface,
   },
-  chevron: {
-    color: Colors.textMuted,
-    fontSize: 26,
-  },
-  pressed: {
-    opacity: 0.65,
-  },
+  logoutText: { color: '#B42318', fontSize: 16, fontWeight: '700' },
+  pressed: { opacity: 0.65 },
 });

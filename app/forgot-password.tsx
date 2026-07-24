@@ -4,7 +4,6 @@ import {
   Alert,
   KeyboardAvoidingView,
   Platform,
-  Pressable,
   StyleSheet,
   Text,
   View,
@@ -17,31 +16,24 @@ import { Spacing } from '@/constants/spacing';
 import { useAuth } from '@/hooks/useAuth';
 import { isValidEmail } from '@/utils/validation';
 
-export default function LoginScreen() {
-  const { login } = useAuth();
+export default function ForgotPasswordScreen() {
+  const { forgotPassword } = useAuth();
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
 
-  async function handleLogin() {
+  async function handleSubmit() {
     if (!isValidEmail(email)) {
       Alert.alert('Check your email', 'Enter a valid email address.');
       return;
     }
 
-    if (password.length < 6) {
-      Alert.alert('Check your password', 'Password must be at least 6 characters.');
-      return;
-    }
-
     try {
       setLoading(true);
-      await login({ email, password });
-      router.replace('/(tabs)');
-    } catch (error) {
+      await forgotPassword(email);
       Alert.alert(
-        'Unable to log in',
-        error instanceof Error ? error.message : 'Please try again.',
+        'Reset request received',
+        'Email delivery will be activated when Supabase is connected in Phase 8.',
+        [{ text: 'Back to login', onPress: () => router.replace('/login') }],
       );
     } finally {
       setLoading(false);
@@ -54,9 +46,10 @@ export default function LoginScreen() {
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
       <View>
-        <Text style={styles.title}>Welcome back</Text>
+        <Text style={styles.title}>Reset your password</Text>
         <Text style={styles.subtitle}>
-          Log in to access your saved FlightFits account on this device.
+          Enter your account email. The screen and flow are ready now; Phase 8
+          will connect actual reset emails through Supabase.
         </Text>
 
         <View style={styles.form}>
@@ -68,27 +61,11 @@ export default function LoginScreen() {
             keyboardType="email-address"
             autoCapitalize="none"
           />
-          <AppTextInput
-            label="Password"
-            value={password}
-            onChangeText={setPassword}
-            placeholder="At least 6 characters"
-            secureTextEntry
-          />
-
-          <Pressable onPress={() => router.push('/forgot-password' as never)}>
-            <Text style={styles.forgot}>Forgot password?</Text>
-          </Pressable>
-
           <PrimaryButton
-            label={loading ? 'Logging in…' : 'Log in'}
-            onPress={loading ? () => undefined : handleLogin}
+            label={loading ? 'Submitting…' : 'Send reset link'}
+            onPress={loading ? () => undefined : handleSubmit}
           />
         </View>
-
-        <Text style={styles.link} onPress={() => router.push('/signup')}>
-          New to FlightFits? Create an account
-        </Text>
       </View>
     </KeyboardAvoidingView>
   );
@@ -110,15 +87,4 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.xl,
   },
   form: { gap: Spacing.md },
-  forgot: {
-    color: Colors.primary,
-    fontWeight: '700',
-    textAlign: 'right',
-  },
-  link: {
-    color: Colors.primary,
-    fontWeight: '700',
-    textAlign: 'center',
-    marginTop: Spacing.lg,
-  },
 });
